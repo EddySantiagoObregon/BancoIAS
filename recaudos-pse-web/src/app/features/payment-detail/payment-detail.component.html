@@ -1,0 +1,53 @@
+@let r = report();
+<div class="receipt" [class.receipt--rejected]="r.status === 'REJECTED'">
+  <div class="receipt__head">
+    <div>
+      <div class="receipt__label">{{ title() }}</div>
+      <div class="receipt__ref mono">{{ r.paymentReference }}</div>
+    </div>
+    <span [class]="'state state--' + r.status.toLowerCase()">{{ statusLabel[r.status] }}</span>
+  </div>
+
+  @if (replayed()) {
+    <div class="alert alert--info">
+      La referencia ya estaba registrada con los mismos datos. Se muestra el resultado original y no se
+      descontó saldo de nuevo.
+    </div>
+  }
+
+  @if (r.status === 'REJECTED') {
+    <div class="receipt__reason">
+      <span>Motivo del rechazo</span>
+      <strong>{{ r.reasonMessage }}</strong>
+    </div>
+  }
+
+  <table class="receipt__rows">
+    <tr>
+      <th>Valor</th>
+      <td class="amount">{{ r.amount | currency: 'COP' : 'symbol-narrow' : '1.0-2' }}</td>
+    </tr>
+    <tr>
+      <th>Orden de recaudo</th>
+      <td class="mono">{{ r.collectionOrderId }}</td>
+    </tr>
+    <tr>
+      <th>Comercio</th>
+      <td class="mono">{{ r.merchantId }}</td>
+    </tr>
+    @if (r.balanceAfter !== undefined && r.balanceAfter !== null) {
+      <tr>
+        <th>Saldo después del pago</th>
+        <td class="amount">{{ r.balanceAfter | currency: 'COP' : 'symbol-narrow' : '1.0-2' }}</td>
+      </tr>
+    }
+    <tr>
+      <th>Fecha de procesamiento</th>
+      <td>{{ r.processedAt | date: 'dd/MM/yyyy hh:mm:ss a' }}</td>
+    </tr>
+    <tr>
+      <th>Código de resultado</th>
+      <td class="mono muted">{{ r.reasonCode }}</td>
+    </tr>
+  </table>
+</div>

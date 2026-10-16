@@ -1,0 +1,34 @@
+<header class="appbar">
+  <div class="appbar__inner">
+    <div class="appbar__brand">
+      <span class="logo">Banco<b>IAS</b></span>
+      <span class="appbar__divider"></span>
+      <span class="appbar__module">Core de Recaudos PSE</span>
+    </div>
+    <div class="appbar__meta">
+      <span>Ambiente: <b>Simulación</b></span>
+      <span>{{ today | date: "EEEE d 'de' MMMM, y" }}</span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page__head">
+    <nav class="crumbs">Recaudos <span>/</span> PSE <span>/</span> Reportes de pago</nav>
+    <h1>BancoIAS — Core de Recaudos PSE</h1>
+    <p>Registro y aplicación de reportes de pago sobre órdenes de recaudo. No se mueve dinero real.</p>
+  </div>
+
+  <app-orders-panel />
+
+  <div class="page__grid">
+    <app-payment-form />
+    <app-payment-lookup />
+  </div>
+
+  <app-recent-payments />
+</main>
+
+<footer class="footer">
+  BancoIAS · Core de Recaudos PSE · v1.0.0
+</footer>

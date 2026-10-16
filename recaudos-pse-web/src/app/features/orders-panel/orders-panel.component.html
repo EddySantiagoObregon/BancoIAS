@@ -1,0 +1,22 @@
+<section class="orders" aria-label="Saldos de órdenes de recaudo">
+  @for (o of orders(); track o.id) {
+    <div class="orders__item" [class.is-blocked]="o.status === 'BLOCKED'">
+      <div class="orders__top">
+        <span class="mono">{{ o.id }}</span>
+        <span [class]="'state state--' + o.status.toLowerCase()">{{ statusLabel[o.status] }}</span>
+      </div>
+      <div class="orders__amount">{{ o.pendingBalance | currency: 'COP' : 'symbol-narrow' : '1.0-2' }}</div>
+      <div class="orders__foot">Saldo pendiente · {{ o.merchantId }}</div>
+    </div>
+  } @empty {
+    @if (!error()) {
+      <div class="orders__item orders__item--empty">Cargando órdenes…</div>
+    }
+  }
+  @if (error(); as e) {
+    <div class="alert alert--error orders__error">
+      {{ e.message }}
+      <button type="button" class="link" (click)="refresh()">Reintentar</button>
+    </div>
+  }
+</section>

@@ -1,0 +1,30 @@
+<section class="panel">
+  <div class="panel__title">
+    <h2>Consultar reporte</h2>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="search()" novalidate class="search">
+    <label for="lookupRef">Referencia de pago</label>
+    <div class="search__row">
+      <input id="lookupRef" formControlName="paymentReference" placeholder="Ej. PSE-REF-001" autocomplete="off" />
+      <button type="submit" class="btn btn--primary" [disabled]="loading()">
+        {{ loading() ? 'Buscando…' : 'Consultar' }}
+      </button>
+    </div>
+    @if (form.controls.paymentReference.touched && form.controls.paymentReference.invalid) {
+      <small class="field__error">Ingrese una referencia.</small>
+    }
+  </form>
+
+  @if (report(); as r) {
+    <app-payment-detail [report]="r" title="Reporte encontrado" />
+  }
+  @if (error(); as e) {
+    <div class="alert" [class.alert--info]="e.status === 404" [class.alert--error]="e.status !== 404">
+      {{ e.message }}
+    </div>
+  }
+  @if (!report() && !error() && !loading()) {
+    <p class="panel__empty">Ingrese una referencia para ver su estado, el valor y el motivo del resultado.</p>
+  }
+</section>

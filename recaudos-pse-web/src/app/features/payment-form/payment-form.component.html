@@ -1,0 +1,84 @@
+<section class="panel">
+  <div class="panel__title">
+    <h2>Nuevo reporte de pago</h2>
+    <span class="panel__hint">Los campos marcados con * son obligatorios</span>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form">
+    <div class="field">
+      <div class="field__label">
+        <label for="paymentReference">Referencia de pago *</label>
+        <button type="button" class="link" (click)="generateReference()">Generar referencia</button>
+      </div>
+      <input id="paymentReference" formControlName="paymentReference" placeholder="Ej. PSE-REF-001" autocomplete="off" />
+      @if (hasError('paymentReference', 'required')) {
+        <small class="field__error">Ingrese la referencia del pago.</small>
+      }
+      @if (hasError('paymentReference', 'pattern')) {
+        <small class="field__error">Use solo letras, números, guion o guion bajo.</small>
+      }
+      @if (hasError('paymentReference', 'maxlength')) {
+        <small class="field__error">La referencia admite hasta 50 caracteres.</small>
+      }
+    </div>
+
+    <div class="form__row">
+      <div class="field">
+        <label for="collectionOrderId">Orden de recaudo *</label>
+        <input id="collectionOrderId" formControlName="collectionOrderId" list="orderOptions" autocomplete="off" />
+        <datalist id="orderOptions">
+          @for (order of orderOptions$ | async; track order.id) {
+            <option [value]="order.id">{{ order.merchantId }}</option>
+          }
+        </datalist>
+        @if (hasError('collectionOrderId', 'required')) {
+          <small class="field__error">Ingrese la orden.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="merchantId">Comercio *</label>
+        <input id="merchantId" formControlName="merchantId" autocomplete="off" />
+        @if (hasError('merchantId', 'required')) {
+          <small class="field__error">Ingrese el comercio.</small>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="amount">Valor del pago (COP) *</label>
+      <div class="money">
+        <span>$</span>
+        <input id="amount" type="number" step="0.01" formControlName="amount" placeholder="0" />
+      </div>
+      @if (hasError('amount', 'required')) {
+        <small class="field__error">Ingrese el valor del pago.</small>
+      }
+    </div>
+
+    <div class="form__actions">
+      <button type="button" class="btn btn--secondary" (click)="clear()" [disabled]="submitting()">Limpiar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+        {{ submitting() ? 'Procesando…' : 'Procesar pago' }}
+      </button>
+    </div>
+  </form>
+
+  @if (submission(); as s) {
+    <app-payment-detail [report]="s.report" [replayed]="s.replayed" />
+  }
+
+  @if (error(); as e) {
+    <div class="alert" [class.alert--warning]="e.status === 409" [class.alert--error]="e.status !== 409">
+      <strong>{{ e.status === 409 ? 'La referencia ya existe con otros datos' : 'No fue posible procesar el reporte' }}</strong>
+      <div>{{ e.message }}</div>
+      @if (e.details.length) {
+        <ul>
+          @for (d of e.details; track d.field) {
+            <li>{{ d.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,74 @@
+<section class="panel">
+  <div class="panel__title">
+    <h2>Reportes procesados recientemente</h2>
+    <div class="toolbar">
+      <label for="orderFilter">Orden</label>
+      <select id="orderFilter" (change)="changeOrder($any($event.target).value)">
+        <option value="" [selected]="orderFilter() === ''">Todas</option>
+        @for (o of orderOptions$ | async; track o.id) {
+          <option [value]="o.id" [selected]="o.id === orderFilter()">{{ o.id }} · {{ o.merchantId }}</option>
+        }
+      </select>
+      <label for="limit">Últimos</label>
+      <select id="limit" (change)="changeLimit($any($event.target).value)">
+        @for (l of limits; track l) {
+          <option [value]="l" [selected]="l === limit()">{{ l }}</option>
+        }
+      </select>
+      <button type="button" class="btn btn--secondary btn--sm" (click)="refresh()" [disabled]="loading()">
+        {{ loading() ? 'Actualizando…' : 'Actualizar' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" [class.is-active]="filter() === 'ALL'" (click)="filter.set('ALL')">
+      Todos <span>{{ reports().length }}</span>
+    </button>
+    <button type="button" role="tab" [class.is-active]="filter() === 'APPLIED'" (click)="filter.set('APPLIED')">
+      Aplicados <span>{{ appliedCount() }}</span>
+    </button>
+    <button type="button" role="tab" [class.is-active]="filter() === 'REJECTED'" (click)="filter.set('REJECTED')">
+      Rechazados <span>{{ rejectedCount() }}</span>
+    </button>
+  </div>
+
+  @if (error(); as e) {
+    <div class="alert alert--error">{{ e.message }}</div>
+  }
+
+  <div class="table-wrap">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Referencia</th>
+          <th>Orden</th>
+          <th>Comercio</th>
+          <th class="num">Valor</th>
+          <th>Estado</th>
+          <th>Observación</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of visible(); track r.paymentReference) {
+          <tr>
+            <td class="nowrap">{{ r.processedAt | date: 'dd/MM/yy hh:mm a' }}</td>
+            <td class="mono">{{ r.paymentReference }}</td>
+            <td class="mono">{{ r.collectionOrderId }}</td>
+            <td class="mono">{{ r.merchantId }}</td>
+            <td class="num amount">{{ r.amount | currency: 'COP' : 'symbol-narrow' : '1.0-2' }}</td>
+            <td><span [class]="'state state--' + r.status.toLowerCase()">{{ statusLabel[r.status] }}</span></td>
+            <td class="obs">{{ r.status === 'REJECTED' ? r.reasonMessage : 'Aplicado a la orden' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="grid__empty">
+              {{ loading() ? 'Cargando reportes…' : (orderFilter() ? 'La orden ' + orderFilter() + ' no tiene reportes.' : 'No hay reportes para mostrar.') }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

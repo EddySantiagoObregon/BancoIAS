@@ -1,0 +1,22 @@
+# Java / Maven
+recaudos-pse-ms/target/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.cursor/
+
+# Angular / Node
+recaudos-pse-web/node_modules/
+recaudos-pse-web/dist/
+recaudos-pse-web/.angular/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local env
+.env
