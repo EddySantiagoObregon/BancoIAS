@@ -16,5 +16,28 @@ services:
       timeout: 3s
       retries: 10
 
+  recaudos-pse-ms:
+    build: ./recaudos-pse-ms
+    container_name: recaudos-pse-ms
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bancoias_pse
+      DB_USER: bancoias
+      DB_PASSWORD: bancoias
+    ports:
+      - "8090:8090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  recaudos-pse-web:
+    build: ./recaudos-pse-web
+    container_name: recaudos-pse-web
+    ports:
+      - "4200:80"
+    depends_on:
+      - recaudos-pse-ms
+
 volumes:
   pse-data:

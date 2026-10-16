@@ -42,7 +42,7 @@ que corre igual en Java 21.
 
 ```text
 .
-├── docker-compose.yml          PostgreSQL 16 (puerto local 5433)
+├── docker-compose.yml          PostgreSQL 16, microservicio y frontend
 ├── recaudos-pse-ms/            microservicio Spring WebFlux
 │   └── src/main/java/com/bancoias/pse/
 │       ├── collections/        entidades persistidas (@Table de R2DBC)
@@ -73,16 +73,38 @@ mensajería porque esta versión no tiene integraciones externas (ver decisiones
 
 ## Cómo ejecutar
 
-### 1. PostgreSQL
+### Opción rápida: todo con Docker
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
-Levanta `bancoias-pse-db` en `localhost:5433` (base `bancoias_pse`, usuario/clave `bancoias`). Uso el 5433
-para no chocar con otra instancia en el 5432.
+Construye y levanta los tres servicios:
 
-### 2. Backend
+| Servicio | URL |
+|---|---|
+| `recaudos-pse-web` (Angular servido por Nginx) | `http://localhost:4200` |
+| `recaudos-pse-ms` (API y Swagger) | `http://localhost:8090/swagger-ui.html` |
+| `bancoias-pse-db` (PostgreSQL) | `localhost:5433` |
+
+Nginx reenvía `/api` al microservicio dentro de la red de Docker, así que el navegador solo habla con el
+4200. La primera construcción tarda unos minutos; las siguientes reutilizan la caché. Las imágenes se
+construyen sin ejecutar las pruebas (ver la sección de pruebas). Para detener todo: `docker compose down`.
+
+### Opción de desarrollo: cada parte por separado
+
+#### 1. PostgreSQL
+
+```bash
+docker compose up -d postgres
+```
+
+Levanta solo `bancoias-pse-db` en `localhost:5433` (base `bancoias_pse`, usuario/clave `bancoias`). Uso el
+5433 para no chocar con otra instancia en el 5432. Si los contenedores del microservicio y del frontend
+están corriendo, hay que detenerlos antes (`docker compose stop recaudos-pse-ms recaudos-pse-web`) porque
+ocupan los puertos 8090 y 4200.
+
+#### 2. Backend
 
 ```bash
 cd recaudos-pse-ms
@@ -100,10 +122,13 @@ Swagger UI: `http://localhost:8090/swagger-ui.html`
 Para volver al estado inicial (saldos originales y sin reportes):
 
 ```bash
-docker compose down -v && docker compose up -d
+docker compose down -v && docker compose up -d postgres
 ```
 
-### 3. Frontend
+Con la opción de Docker completa es igual, pero cerrando con `docker compose up -d` en lugar de solo
+`postgres`.
+
+#### 3. Frontend
 
 ```bash
 cd recaudos-pse-web
@@ -114,7 +139,7 @@ npm start
 Abre `http://localhost:4200`. `ng serve` usa `proxy.conf.json` para enviar `/api` al backend en el 8090. El
 backend también tiene CORS habilitado para `http://localhost:4200`.
 
-### 4. Pruebas
+### Pruebas
 
 ```bash
 cd recaudos-pse-ms
